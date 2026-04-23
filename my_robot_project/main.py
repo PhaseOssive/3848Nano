@@ -13,7 +13,7 @@ THRESHOLD_RATE = 0.6
 
 # --- 初始化 ---
 face_engine = FaceRecognizer()
-obj_engine = ObjectRecognizer("best.pt")
+obj_engine = ObjectRecognizer("best.onnx")
 cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
