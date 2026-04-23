@@ -65,7 +65,7 @@ class FaceRecognizer:
                     img = ImageOps.exif_transpose(img)
                     img_array = np.array(img.convert("RGB"))
                     
-                    encodings = face_recognition.face_encodings(img_array, num_jitters=1)
+                    encodings = face_recognition.face_encodings(img_array, num_jitters=10)
                     
                     if len(encodings) > 0:
                         encoding = encodings[0]

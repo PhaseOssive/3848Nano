@@ -6,14 +6,14 @@ from face_module import FaceRecognizer
 from object_module import ObjectRecognizer
 
 # --- 配置区 ---
-API_KEY = "OU8ODWSeWojje7T6mzms"
-MODEL_ID = "my-first-project-smgqf/1"
+# API_KEY = "OU8ODWSeWojje7T6mzms"
+# MODEL_ID = "my-first-project-smgqf/1"
 WINDOW_DURATION = 2.0  
 THRESHOLD_RATE = 0.6   
 
 # --- 初始化 ---
 face_engine = FaceRecognizer()
-obj_engine = ObjectRecognizer(MODEL_ID, API_KEY)
+obj_engine = ObjectRecognizer("best.pt")
 cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
@@ -26,7 +26,7 @@ unknown_face_hits = 0 # 不认识的人脸次数
 obj_hits = 0         # 物体检测次数
 
 print("--- 系统启动：多模态同步检测中 ---")
-
+count = 0
 while True:
     ret, frame = cap.read()
     count += 1
@@ -58,18 +58,18 @@ while True:
     if len(face_encodings) > 0:
         for encoding in face_encodings:
             # 这里的逻辑根据你 face_module 的 tolerance 进行匹配
-            tolerance = 0.45 if is_forced_face else 0.6
+            tolerance = 0.38 if is_forced_face else 0.45
             distances = face_recognition.face_distance(face_engine.known_encodings, encoding)
             
-            if len(distances) > 0 and np.min(distances) < tolerance:
-                # 情况 1: 认识的人
-                found_known_this_frame = True
-                name_found = face_engine.known_names[np.argmin(distances)]
-                current_frame_messages.append(f"[人脸] 认识: {name_found}")
-            else:
-                # 情况 2: 检测到脸，但库里不认识
-                found_unknown_this_frame = True
-                current_frame_messages.append(f"[人脸] 不认识人脸")
+            if len(distances) > 0:
+                min_dist = np.min(distances)
+                # 严格检查：距离越小越可信
+                if min_dist < tolerance:
+                    found_known_this_frame = True
+                    name_found = face_engine.known_names[np.argmin(distances)]
+                    current_frame_messages.append(f"[人脸] 认识: {name_found}")
+                elif min_dist < 0.7: # 介于两者之间，说明确实是人脸，但不是 Owen
+                    found_unknown_this_frame = True
     
     # 统计计次
     if found_known_this_frame: face_hits += 1
